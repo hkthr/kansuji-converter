@@ -1,0 +1,113 @@
+
+plugins {
+    id 'java-library'
+    id 'antlr' 
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    antlr("org.antlr:antlr4:4.7.2") // use ANTLR version 4
+}
+
+version = "0.1.0"
+group = "com.github.hkthr"
+archivesBaseName = "kansujiConv"
+
+ext {
+   javaMainClass = group + ".KansujiConverter"
+   imageName = "kansujiconv"
+   containerName = "hkthr"
+   fullContainerName = "${containerName}/${imageName}"
+   kansuji_runtime = archivesBaseName + "-" + version + ".jar"
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+generateGrammarSource {
+    arguments += ['-encoding', 'UTF-8']
+}
+
+jar {
+    manifest {
+        attributes(
+            "Main-Class": javaMainClass
+        )
+    }
+}
+
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+tasks.named('test') {
+	systemProperty "file.encoding", "UTF-8"
+    useJUnitPlatform()
+
+    testLogging {
+        // set options for log level LIFECYCLE
+        events TestLogEvent.FAILED,
+                TestLogEvent.PASSED,
+                TestLogEvent.SKIPPED,
+                TestLogEvent.STANDARD_OUT
+        exceptionFormat TestExceptionFormat.FULL
+        showExceptions true
+        showCauses true
+        showStackTraces true
+
+        debug {
+            events TestLogEvent.STARTED,
+                    TestLogEvent.FAILED,
+                    TestLogEvent.PASSED,
+                    TestLogEvent.SKIPPED,
+                    TestLogEvent.STANDARD_ERROR,
+                    TestLogEvent.STANDARD_OUT
+        }
+        info {
+            events TestLogEvent.FAILED,
+                    TestLogEvent.PASSED,
+                    TestLogEvent.SKIPPED,
+                    TestLogEvent.STANDARD_ERROR,
+                    TestLogEvent.STANDARD_OUT
+        }
+    }
+}
+
+task dockerBuild(type: Exec) {
+    dependsOn build
+
+    description 'Build Docker'
+    workingDir '.'
+    commandLine 'docker', 'build', '-t', fullContainerName, '--no-cache', '--build-arg', 'kansuji_runtime='+kansuji_runtime, '.'
+
+    doLast {
+        println "-- Docker build executed(${fullContainerName})! --"
+    }
+}
+
+task exampleRun(type: JavaExec) {
+    description 'Run example'
+
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    mainClass = javaMainClass
+    doFirst {
+        println "Please use '--console=plain' option to exec gradle to pretty print."
+    }
+}
+
+// It looks like not working for console app...
+/*
+task dockerRun(type: Exec) {
+    description 'Run Docker'
+    commandLine 'docker', 'run', '-t', fullContainerName, '/bin/bash'
+    doLast {
+        println "docker run -it --rm ${fullContainerName}"
+    }
+}
+*/
+
