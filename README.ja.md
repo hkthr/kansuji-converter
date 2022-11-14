@@ -31,7 +31,7 @@
 本ライブラリを使用するには、呼び出したいコードから必要に応じて上記メソッドを呼び出してください。
 
 ```
-import jp.example.kansuji.KansujiConverter;
+import com.github.hkthr.KansujiConverter;
 (省略)
 ...
     // 漢数字から数字に変換

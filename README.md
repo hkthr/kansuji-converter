@@ -31,7 +31,7 @@ Convert from number to kansuji :
 You can import this tool and call these methods within your program as you need.
 
 ```
-import jp.example.kansuji.KansujiConverter;
+import com.github.hkthr.KansujiConverter;
 (snip)
 ...
     // From Kansuji to Number

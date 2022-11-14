@@ -5,4 +5,4 @@ if [ "$1" == "--build" ]; then
     gradle dockerBuild
 fi
 
-docker run -it --rm example.jp/kansujiconv 
+docker run -it --rm hkthr/kansujiconv 
