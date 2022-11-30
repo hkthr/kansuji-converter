@@ -84,4 +84,4 @@ chmod +x ./docker-example-run.sh
 hkthr
 
 ## ライセンス
-Apache license v2
+MIT License
